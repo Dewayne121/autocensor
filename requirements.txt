@@ -9,4 +9,5 @@ pydub
 ffmpeg-python
 webrtcvad
 fastapi
+python-multipart
 uvicorn[standard]
