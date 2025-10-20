@@ -11,3 +11,4 @@ webrtcvad
 fastapi
 python-multipart
 uvicorn[standard]
+pytest
