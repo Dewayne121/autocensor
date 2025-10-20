@@ -6,14 +6,10 @@
   <title>Autocensor Demo</title>
   <style>
     :root {
-      color-scheme: dark;
+      color-scheme: light dark;
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f172a;
+      background: radial-gradient(circle at top, #202a44, #0f172a);
       color: #e2e8f0;
-    }
-
-    * {
-      box-sizing: border-box;
     }
 
     body {
@@ -22,156 +18,45 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: clamp(24px, 6vw, 64px);
-      background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.25), transparent 55%),
-        radial-gradient(circle at 80% 0%, rgba(16, 185, 129, 0.25), transparent 60%),
-        #020617;
-      position: relative;
-      overflow: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: absolute;
-      inset: -20% 0;
-      background: linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
-        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-      background-size: 48px 48px;
-      opacity: 0.35;
-      z-index: 0;
-    }
-
-    main {
-      width: min(1040px, 100%);
-      position: relative;
-      z-index: 1;
+      background: transparent;
     }
 
     .card {
+      width: min(95vw, 720px);
       background: rgba(15, 23, 42, 0.9);
-      border-radius: 28px;
-      padding: clamp(32px, 6vw, 48px);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      box-shadow: 0 50px 120px rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(18px);
-      display: grid;
-      gap: clamp(28px, 5vw, 40px);
-    }
-
-    .hero {
-      display: grid;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .hero-header {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(34, 197, 94, 0.15);
-      color: #bbf7d0;
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 36px;
+      box-shadow: 0 40px 120px rgba(15, 23, 42, 0.35);
     }
 
     h1 {
-      font-size: clamp(2.1rem, 4.6vw, 3.2rem);
-      margin: 0;
+      font-size: clamp(1.8rem, 2.6vw, 2.8rem);
+      margin: 0 0 12px;
       letter-spacing: -0.02em;
     }
 
-    .hero p {
-      margin: 0;
-      max-width: 60ch;
-      color: rgba(226, 232, 240, 0.82);
-      font-size: clamp(1.02rem, 1.3vw, 1.15rem);
-      line-height: 1.7;
-    }
-
-    .info-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    }
-
-    .info-card {
-      padding: 16px 18px;
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      background: rgba(30, 41, 59, 0.65);
-      display: grid;
-      gap: 6px;
-    }
-
-    .info-card span {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: rgba(148, 163, 184, 0.75);
-    }
-
-    .info-card strong {
-      font-size: 1.1rem;
-      color: #f8fafc;
-    }
-
-    .upload-area {
-      display: grid;
-      gap: 18px;
+    p {
+      margin: 0 0 28px;
+      line-height: 1.6;
+      color: #cbd5f5;
     }
 
     .dropzone {
-      position: relative;
-      border: 1.5px dashed rgba(148, 163, 184, 0.35);
-      border-radius: 24px;
-      padding: clamp(28px, 4vw, 42px);
+      border: 2px dashed rgba(148, 163, 184, 0.35);
+      border-radius: 18px;
+      padding: 28px;
       text-align: center;
       cursor: pointer;
-      transition: border-color 0.25s ease, transform 0.25s ease, background 0.25s ease;
-      background: rgba(15, 23, 42, 0.55);
-    }
-
-    .dropzone-icon {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 18px;
-    }
-
-    .dropzone-icon svg {
-      width: clamp(42px, 6vw, 56px);
-      height: auto;
-      fill: rgba(56, 189, 248, 0.85);
-      filter: drop-shadow(0 10px 18px rgba(56, 189, 248, 0.25));
-    }
-
-    .dropzone strong {
-      display: block;
-      font-size: 1.05rem;
-    }
-
-    .dropzone small {
-      display: block;
-      margin-top: 6px;
-      color: rgba(148, 163, 184, 0.8);
+      transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
     }
 
     .dropzone:hover,
     .dropzone.dragover {
-      border-color: rgba(56, 189, 248, 0.75);
-      transform: translateY(-3px);
+      border-color: #38bdf8;
+      transform: translateY(-2px);
       background: rgba(56, 189, 248, 0.08);
-      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.15);
     }
 
     .dropzone input {
@@ -182,6 +67,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
+      margin-top: 28px;
       align-items: center;
     }
 
@@ -189,151 +75,91 @@
       appearance: none;
       border: none;
       border-radius: 999px;
-      padding: 12px 26px;
+      padding: 12px 24px;
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-    }
-
-    .primary-btn {
-      background: linear-gradient(135deg, #38bdf8, #6366f1);
       color: #0f172a;
-      box-shadow: 0 16px 30px rgba(99, 102, 241, 0.35);
-    }
-
-    .secondary-btn {
-      background: rgba(30, 41, 59, 0.85);
-      color: #e2e8f0;
-      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     button:disabled {
-      opacity: 0.55;
+      opacity: 0.6;
       cursor: not-allowed;
       box-shadow: none;
     }
 
     button:not(:disabled):hover {
-      transform: translateY(-2px);
-      box-shadow: 0 22px 38px rgba(99, 102, 241, 0.45);
-    }
-
-    .status-block {
-      min-height: 1.6em;
-      font-size: 0.9rem;
-      color: rgba(148, 163, 184, 0.9);
-    }
-
-    .status-block.error {
-      color: #fca5a5;
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 0 18px 36px rgba(99, 102, 241, 0.45);
     }
 
     .audio-panels {
+      margin-top: 32px;
       display: grid;
-      gap: 18px;
+      gap: 20px;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
 
     .panel {
       background: rgba(15, 23, 42, 0.7);
-      border-radius: 20px;
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      padding: 20px 22px 28px;
-      display: grid;
-      gap: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      padding: 18px 20px 24px;
     }
 
     .panel h2 {
       font-size: 1.05rem;
-      margin: 0;
-      color: #e2e8f0;
+      margin: 0 0 12px;
     }
 
-    audio {
-      width: 100%;
-      filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.55));
+    .status {
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      min-height: 1.4em;
     }
 
-    @media (max-width: 768px) {
-      .actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .actions button {
-        width: 100%;
-      }
+    .error {
+      color: #fca5a5;
     }
 
     @media (max-width: 600px) {
-      body {
-        padding: 24px;
-      }
-
       .card {
-        border-radius: 20px;
-        padding: 24px;
+        padding: 26px;
       }
     }
   </style>
 </head>
 <body>
-  <main>
-    <section class="card">
-      <header class="hero">
-        <div class="hero-header">
-          <span class="hero-badge">PCPartGuide Toolkit</span>
-          <span>AI-powered audio censoring</span>
-        </div>
-        <h1>Keep your creator uploads clean in seconds.</h1>
-        <p>Drop a recording to instantly identify profanity, insert tasteful beeps, and download a ready-to-share version. Perfect for moderation queues, creator support teams, and collaborative editing sessions.</p>
+  <main class="card">
+    <h1>Autocensor</h1>
+    <p>Upload an audio clip and the demo will call the hosted API to automatically bleep any profane words. You can compare the original and censored versions and download the output.</p>
 
-        <div class="info-grid">
-          <div class="info-card">
-            <span>Step 1</span>
-            <strong>Select or drop any audio file</strong>
-          </div>
-          <div class="info-card">
-            <span>Step 2</span>
-            <strong>We detect sensitive language</strong>
-          </div>
-          <div class="info-card">
-            <span>Step 3</span>
-            <strong>Review + download the clean mix</strong>
-          </div>
-        </div>
-      </header>
+    <label class="dropzone" id="dropzone">
+      <strong>Click to choose an audio file</strong>
+      <br />
+      <small>or drag & drop (WAV/MP3/FLAC)</small>
+      <input type="file" id="fileInput" accept="audio/*" />
+    </label>
 
-      <section class="upload-area">
-        <label class="dropzone" id="dropzone">
-          <div class="dropzone-icon" aria-hidden="true">
-            <svg viewBox="0 0 64 64" role="presentation">
-              <path d="M32 6a18 18 0 0 0-18 18h6a12 12 0 0 1 24 0h6A18 18 0 0 0 32 6Zm0 12a6 6 0 0 0-6 6h4v12h4V24h4a6 6 0 0 0-6-6Zm-18 6A14 14 0 0 0 0 38a14 14 0 0 0 14 14h36a14 14 0 0 0 0-28h-2v6h2a8 8 0 0 1 0 16H14a8 8 0 0 1 0-16h2v-6Zm18 8-8 8h6v10h4V40h6l-8-8Z" />
-            </svg>
-          </div>
-          <strong>Click to choose an audio file</strong>
-          <small>or drag & drop (WAV / MP3 / FLAC)</small>
-          <input type="file" id="fileInput" accept="audio/*" />
-        </label>
+    <div class="actions">
+      <button id="censorBtn" disabled>Upload & Censor</button>
+      <button id="downloadBtn" disabled>Download Censored Audio</button>
+      <span class="status" id="statusText"></span>
+    </div>
 
-        <div class="actions">
-          <button class="primary-btn" id="censorBtn" disabled>Upload & Censor</button>
-          <button class="secondary-btn" id="downloadBtn" disabled>Download Censored Audio</button>
-        </div>
-        <span class="status-block" id="statusText"></span>
-      </section>
-
-      <section class="audio-panels">
-        <div class="panel">
-          <h2>Original Audio</h2>
-          <audio id="originalPlayer" controls preload="metadata"></audio>
-        </div>
-        <div class="panel">
-          <h2>Censored Preview</h2>
-          <audio id="censoredPlayer" controls preload="metadata"></audio>
-        </div>
-      </section>
+    <section class="audio-panels">
+      <div class="panel">
+        <h2>Original</h2>
+        <audio id="originalPlayer" controls preload="metadata"></audio>
+      </div>
+      <div class="panel">
+        <h2>Censored</h2>
+        <audio id="censoredPlayer" controls preload="metadata"></audio>
+      </div>
     </section>
   </main>
 
