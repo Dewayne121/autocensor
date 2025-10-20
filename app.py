@@ -7,6 +7,8 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from faster_whisper import WhisperModel
 
+from profanity import detect_profane_spans
+
 app = FastAPI()
 
 ALLOWED_ORIGINS = [
@@ -26,39 +28,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-model = WhisperModel("tiny.en", compute_type="int8")  # good CPU perf
 
-# A lightweight lexicon of common English profanity. The list is intentionally
-# limited to single words so it can run offline and without external
-# dependencies. It is not exhaustive, but it covers the most common profanities
-# users have reported slipping through the filter.
-PROFANE = {
-    "ass",
-    "asshole",
-    "bastard",
-    "bitch",
-    "bloody",
-    "bullshit",
-    "cock",
-    "crap",
-    "cunt",
-    "damn",
-    "dick",
-    "douche",
-    "fucker",
-    "fucking",
-    "fuck",
-    "goddamn",
-    "hell",
-    "motherfucker",
-    "nigger",
-    "piss",
-    "shit",
-    "shithead",
-    "slut",
-    "twat",
-    "wanker",
-}
+_model: WhisperModel | None = None
+
+
+def get_model() -> WhisperModel:
+    """Instantiate the Whisper model on first use."""
+
+    global _model
+    if _model is None:
+        _model = WhisperModel("tiny.en", compute_type="int8")  # good CPU perf
+    return _model
 
 def generate_beep(duration_s, sr, freq=1000.0):
     """Generate a loud enough pure tone to fully mask speech."""
@@ -68,19 +48,6 @@ def generate_beep(duration_s, sr, freq=1000.0):
     return (0.6 * np.sin(2 * np.pi * freq * t)).astype(np.float32)
 
 
-def merge_spans(spans):
-    if not spans:
-        return []
-    spans = sorted(spans)
-    merged = [spans[0]]
-    for start, end in spans[1:]:
-        last_start, last_end = merged[-1]
-        if start <= last_end:
-            merged[-1] = (last_start, max(last_end, end))
-        else:
-            merged.append((start, end))
-    return merged
-
 @app.post("/censor")
 async def censor_audio(file: UploadFile = File(...)):
     # Load audio
@@ -89,6 +56,7 @@ async def censor_audio(file: UploadFile = File(...)):
         data = np.mean(data, axis=1)  # mono
 
     # Transcribe with word timestamps
+    model = get_model()
     segments, info = model.transcribe(data, word_timestamps=True, vad_filter=True)
     words = []
     for seg in segments:
@@ -96,18 +64,7 @@ async def censor_audio(file: UploadFile = File(...)):
             words.append({"text": w.word.strip().lower(), "start": w.start, "end": w.end})
 
     # Find profane words
-    censor_spans = []
-    for w in words:
-        token = ''.join(ch for ch in w["text"] if ch.isalpha())
-        if token in PROFANE:
-            # Pad start/end slightly to ensure the whole word is covered even if
-            # Whisper under/overshoots the timestamps by a handful of frames.
-            censor_spans.append((
-                max(0.0, (w["start"] or 0.0) - 0.05),
-                (w["end"] or 0.0) + 0.1,
-            ))
-
-    censor_spans = merge_spans(censor_spans)
+    censor_spans = detect_profane_spans(words)
 
     # Apply beeps
     y = data.copy()
