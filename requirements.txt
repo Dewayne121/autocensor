@@ -1,8 +1,7 @@
-faster-whisper
-ctranslate2
-# PyTorch 2.2.x wheels were not published for Python 3.13. Allow newer builds
-# so Railway's Python 3.13 runtime can install successfully.
-torch>=2.5.0
+faster-whisper==1.0.2
+# ctranslate2 is pulled in by faster-whisper when a compatible wheel exists.
+# Installing it explicitly forces a source build on slim containers and stalls
+# Railway deploys, so we intentionally leave it out here.
 onnxruntime       # optional, not required by faster-whisper
 numpy
 soundfile
