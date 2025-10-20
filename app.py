@@ -28,7 +28,37 @@ app.add_middleware(
 )
 model = WhisperModel("tiny.en", compute_type="int8")  # good CPU perf
 
-PROFANE = {"foo", "bar"}  # replace with your lexicon
+# A lightweight lexicon of common English profanity. The list is intentionally
+# limited to single words so it can run offline and without external
+# dependencies. It is not exhaustive, but it covers the most common profanities
+# users have reported slipping through the filter.
+PROFANE = {
+    "ass",
+    "asshole",
+    "bastard",
+    "bitch",
+    "bloody",
+    "bullshit",
+    "cock",
+    "crap",
+    "cunt",
+    "damn",
+    "dick",
+    "douche",
+    "fucker",
+    "fucking",
+    "fuck",
+    "goddamn",
+    "hell",
+    "motherfucker",
+    "nigger",
+    "piss",
+    "shit",
+    "shithead",
+    "slut",
+    "twat",
+    "wanker",
+}
 
 def generate_beep(duration_s, sr, freq=1000.0):
     t = np.linspace(0, duration_s, int(sr*duration_s), endpoint=False)
