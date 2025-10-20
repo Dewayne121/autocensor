@@ -61,8 +61,25 @@ PROFANE = {
 }
 
 def generate_beep(duration_s, sr, freq=1000.0):
-    t = np.linspace(0, duration_s, int(sr*duration_s), endpoint=False)
-    return (0.2*np.sin(2*np.pi*freq*t)).astype(np.float32)
+    """Generate a loud enough pure tone to fully mask speech."""
+    t = np.linspace(0, duration_s, int(sr * duration_s), endpoint=False)
+    # Use a slightly hotter amplitude than before so the underlying audio is
+    # completely replaced when we overwrite the segment.
+    return (0.6 * np.sin(2 * np.pi * freq * t)).astype(np.float32)
+
+
+def merge_spans(spans):
+    if not spans:
+        return []
+    spans = sorted(spans)
+    merged = [spans[0]]
+    for start, end in spans[1:]:
+        last_start, last_end = merged[-1]
+        if start <= last_end:
+            merged[-1] = (last_start, max(last_end, end))
+        else:
+            merged.append((start, end))
+    return merged
 
 @app.post("/censor")
 async def censor_audio(file: UploadFile = File(...)):
@@ -83,20 +100,32 @@ async def censor_audio(file: UploadFile = File(...)):
     for w in words:
         token = ''.join(ch for ch in w["text"] if ch.isalpha())
         if token in PROFANE:
-            censor_spans.append((w["start"], w["end"]))
+            # Pad start/end slightly to ensure the whole word is covered even if
+            # Whisper under/overshoots the timestamps by a handful of frames.
+            censor_spans.append((
+                max(0.0, (w["start"] or 0.0) - 0.05),
+                (w["end"] or 0.0) + 0.1,
+            ))
+
+    censor_spans = merge_spans(censor_spans)
 
     # Apply beeps
     y = data.copy()
+    n_samples = len(y)
     for (t0, t1) in censor_spans:
-        i0, i1 = int(t0*sr), int(t1*sr)
-        dur = max(i1 - i0, int(0.15*sr))  # min 150ms beep
-        beep = generate_beep(dur/sr, sr)
-        seg = y[i0:i0+len(beep)]
-        # pad if needed
-        if len(seg) < len(beep):
-            pad = np.zeros(len(beep)-len(seg), dtype=np.float32)
-            seg = np.concatenate([seg, pad])
-        y[i0:i0+len(beep)] = np.clip(seg + beep, -1.0, 1.0)
+        i0, i1 = int(t0 * sr), int(t1 * sr)
+        i0 = max(0, i0)
+        i1 = min(n_samples, max(i0 + int(0.15 * sr), i1))
+        if i0 >= i1:
+            continue
+
+        seg_len = i1 - i0
+        beep = generate_beep(seg_len / sr, sr)
+        if len(beep) < seg_len:
+            beep = np.pad(beep, (0, seg_len - len(beep)), mode="edge")
+        elif len(beep) > seg_len:
+            beep = beep[:seg_len]
+        y[i0:i1] = beep
 
     # Encode to WAV for return
     out_buf = io.BytesIO()
