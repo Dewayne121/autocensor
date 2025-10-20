@@ -7,6 +7,8 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from faster_whisper import WhisperModel
 
+from profanity import is_profane_word
+
 app = FastAPI()
 
 ALLOWED_ORIGINS = [
@@ -27,38 +29,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 model = WhisperModel("tiny.en", compute_type="int8")  # good CPU perf
-
-# A lightweight lexicon of common English profanity. The list is intentionally
-# limited to single words so it can run offline and without external
-# dependencies. It is not exhaustive, but it covers the most common profanities
-# users have reported slipping through the filter.
-PROFANE = {
-    "ass",
-    "asshole",
-    "bastard",
-    "bitch",
-    "bloody",
-    "bullshit",
-    "cock",
-    "crap",
-    "cunt",
-    "damn",
-    "dick",
-    "douche",
-    "fucker",
-    "fucking",
-    "fuck",
-    "goddamn",
-    "hell",
-    "motherfucker",
-    "nigger",
-    "piss",
-    "shit",
-    "shithead",
-    "slut",
-    "twat",
-    "wanker",
-}
 
 def generate_beep(duration_s, sr, freq=1000.0):
     """Generate a loud enough pure tone to fully mask speech."""
@@ -98,8 +68,7 @@ async def censor_audio(file: UploadFile = File(...)):
     # Find profane words
     censor_spans = []
     for w in words:
-        token = ''.join(ch for ch in w["text"] if ch.isalpha())
-        if token in PROFANE:
+        if is_profane_word(w["text"]):
             # Pad start/end slightly to ensure the whole word is covered even if
             # Whisper under/overshoots the timestamps by a handful of frames.
             censor_spans.append((
