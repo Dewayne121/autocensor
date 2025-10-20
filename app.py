@@ -12,6 +12,8 @@ app = FastAPI()
 ALLOWED_ORIGINS = [
     "http://localhost",
     "http://localhost:3000",
+    "https://pcpartguide.com",
+    "https://www.pcpartguide.com",
 ]
 
 PCPARTGUIDE_REGEX = r"https://([a-z0-9-]+\.)*pcpartguide\.com$"
