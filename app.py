@@ -1,12 +1,29 @@
 # server.py
-import io, math
+import io
+
 import numpy as np
 import soundfile as sf
-from fastapi import FastAPI, UploadFile, File
-from pydub import AudioSegment
+from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from faster_whisper import WhisperModel
 
 app = FastAPI()
+
+ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+PCPARTGUIDE_REGEX = r"https://([a-z0-9-]+\.)*pcpartguide\.com$"
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=PCPARTGUIDE_REGEX,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 model = WhisperModel("tiny.en", compute_type="int8")  # good CPU perf
 
 PROFANE = {"foo", "bar"}  # replace with your lexicon
